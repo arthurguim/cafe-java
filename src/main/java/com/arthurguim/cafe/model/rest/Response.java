@@ -12,4 +12,5 @@ import lombok.Setter;
 public class Response {
     private Order order;
     private boolean onSale;
+    private String saleName;
 }

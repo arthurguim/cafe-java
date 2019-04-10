@@ -14,7 +14,11 @@ public class Order {
     // Sum of the price of the ingredients
     private Double totalPrice = .0;
 
-    public Order(List<Ingredient> ingredients) {
+    // Name of the sale
+    private String saleName;
+
+    public Order(List<Ingredient> ingredients) throws Exception {
+
         // Do the sum
         for (Ingredient ingredient : ingredients) {
             this.totalPrice += ingredient.getPrice();
