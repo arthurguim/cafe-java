@@ -4,18 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
-import lombok.Setter;
 
 @Getter
-@Setter
 public class Order {
-    private List<String> ingredients = new ArrayList<>();
+
+    // List of the ingredients in the order
+    private List<Ingredient> ingredients = new ArrayList<>();
+
+    // Sum of the price of the ingredients
     private Double totalPrice = .0;
 
-    public Order(Ingredient ingredients[]) {
+    public Order(List<Ingredient> ingredients) {
+        // Do the sum
         for (Ingredient ingredient : ingredients) {
-            this.ingredients.add(ingredient.getName());
             this.totalPrice += ingredient.getPrice();
         }
+
+        this.ingredients = ingredients;
     }
 }
