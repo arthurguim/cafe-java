@@ -10,6 +10,8 @@ import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,6 +21,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonIgnoreProperties({"id", "hamburguers"})
 @Entity
 @Table(name = "INGREDIENTS")
 public class Ingredient {
@@ -40,9 +43,4 @@ public class Ingredient {
     // List of hamburguers - used by JPA
     @ManyToMany
     public List<Hamburguer> hamburguers;
-
-    public Ingredient(String name, Double price) {
-        this.name = name;
-        this.price = price;
-    }
 }
