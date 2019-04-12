@@ -1,6 +1,6 @@
 package com.arthurguim.cafe.cafe.repository;
 
-import com.arthurguim.cafe.model.Ingredient;
+import com.arthurguim.cafe.cafe.model.Ingredient;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
