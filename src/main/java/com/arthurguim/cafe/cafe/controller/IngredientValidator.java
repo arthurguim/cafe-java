@@ -1,15 +1,15 @@
 package com.arthurguim.cafe.cafe.controller;
 
+import com.arthurguim.cafe.cafe.model.Hamburguer;
+import com.arthurguim.cafe.cafe.model.Ingredient;
 import com.arthurguim.cafe.cafe.repository.HamburguerRepository;
 import com.arthurguim.cafe.cafe.repository.IngredientRepository;
-import com.arthurguim.cafe.model.Hamburguer;
-import com.arthurguim.cafe.model.Ingredient;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
-public class Validator {
+@Service
+public class IngredientValidator {
 
     @Autowired
     private IngredientRepository ingredientRepository;
