@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
+@Setter
 public class Order {
 
     // List of the ingredients in the order
@@ -14,8 +16,10 @@ public class Order {
     // Sum of the price of the ingredients
     private Double totalPrice = .0;
 
-    // Name of the sale
-    private String saleName;
+    // Name of the sale(s)
+    private List<String> saleName = new ArrayList<>();
+
+    private Double discount = .0;
 
     public Order(List<Ingredient> ingredients) throws Exception {
 
@@ -25,5 +29,9 @@ public class Order {
         }
 
         this.ingredients = ingredients;
+    }
+
+    public void includeSaleName(String name) {
+        this.saleName.add(name);
     }
 }

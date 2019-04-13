@@ -19,20 +19,24 @@ import org.springframework.web.bind.annotation.RestController;
 public class OrderRestController {
 
     @Autowired
-    private Validator validator;
+    private IngredientValidator ingredientValidator;
+
+    @Autowired
+    private SalesController salesController;
 
     // TODO: fix exception
     @RequestMapping(value = "/custom", method = RequestMethod.POST)
-    public ResponseEntity<com.arthurguim.cafe.cafe.model.Order> customOrder(@RequestBody Request request) throws Exception {
+    public ResponseEntity<Order> customOrder(@RequestBody Request request) throws Exception {
 
         List<Ingredient> ingredients = new ArrayList<>();
         for (Ingredient ingredient : request.getIngredients()) {
-            Ingredient i = validator.validateIngredient(ingredient.getName());
+            Ingredient i = ingredientValidator.validateIngredient(ingredient.getName());
             i.setQuantity(ingredient.getQuantity());
             ingredients.add(i);
         }
 
         Order order = new Order(ingredients);
+        order = salesController.applySaleIfValid(order);
 
         return new ResponseEntity<Order>(order, HttpStatus.CREATED);
     }

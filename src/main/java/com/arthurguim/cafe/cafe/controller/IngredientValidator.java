@@ -6,10 +6,10 @@ import com.arthurguim.cafe.cafe.repository.HamburguerRepository;
 import com.arthurguim.cafe.cafe.repository.IngredientRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
-public class Validator {
+@Service
+public class IngredientValidator {
 
     @Autowired
     private IngredientRepository ingredientRepository;
