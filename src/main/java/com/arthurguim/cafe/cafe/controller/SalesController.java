@@ -111,10 +111,11 @@ public class SalesController {
 
                 // Set price with discount
                 Double orderNewPrice = orderOriginalPrice * (1 - quantitativeSale.getSalePercentage() / 100);
+                Double discount = orderOriginalPrice - orderNewPrice;
 
                 // Update order
                 order.setTotalPrice(orderNewPrice);
-                order.setDiscount(orderOriginalPrice - orderNewPrice);
+                order.setDiscount(orderDiscount + discount);
                 order.includeSaleName(quantitativeSale.getName());
             }
         }
