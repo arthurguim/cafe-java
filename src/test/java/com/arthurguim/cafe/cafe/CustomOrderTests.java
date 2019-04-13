@@ -9,14 +9,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import javax.persistence.EntityNotFoundException;
-
 import com.arthurguim.cafe.cafe.controller.IngredientValidator;
 import com.arthurguim.cafe.cafe.controller.SalesController;
 import com.arthurguim.cafe.cafe.model.Ingredient;
 import com.arthurguim.cafe.cafe.model.Order;
+import com.arthurguim.cafe.cafe.model.sales.ProportionalSale;
 import com.arthurguim.cafe.cafe.model.sales.QuantitativeSale;
 import com.arthurguim.cafe.cafe.repository.IngredientRepository;
+import com.arthurguim.cafe.cafe.repository.ProportionalSaleRepository;
 import com.arthurguim.cafe.cafe.repository.QuantitativeSaleRepository;
 
 import org.junit.Test;
@@ -36,6 +36,9 @@ public class CustomOrderTests {
 
 	@Autowired
 	private QuantitativeSaleRepository quantitativeSaleRepository;
+
+	@Autowired
+	private ProportionalSaleRepository proportionalSaleRepository;
 
 	@Autowired
 	private IngredientRepository ingredientRepository;
@@ -119,5 +122,48 @@ public class CustomOrderTests {
 
 		assertEquals(expectedPrice, order.getTotalPrice());
 		assertEquals(discount, order.getDiscount());
+		assertTrue(order.getSaleName().contains(quantitativeSale.getName()));
+	}
+
+	@Test
+	public void creatingCustomOrderWithOneProportionalDiscount() throws Exception {
+		List<Ingredient> ingredients = new ArrayList<>();
+
+		// Get one proportional sale
+		Optional<ProportionalSale> proportionalSaleOpt = proportionalSaleRepository.findById(1L);
+
+		if(!proportionalSaleOpt.isPresent()) {
+			fail("There was no proportional sales on test database");
+		}
+
+		ProportionalSale proportionalSale = proportionalSaleOpt.get();
+
+		// Get proportional ingredient
+		Optional<Ingredient> ingredientOpt = ingredientRepository.findById(proportionalSale.getIngredientId());
+
+		if(!ingredientOpt.isPresent()) {
+			fail("There was no ingredient on test database");
+		}
+
+		Ingredient ingredient = ingredientOpt.get();
+		ingredient.setQuantity(proportionalSale.getProportion());
+
+		ingredients.add(ingredient);
+
+		Order order = new Order(ingredients);
+		order = salesController.applySaleIfValid(order);
+
+		// Ingredient original price
+		Double ingredientOriginalPrice = ingredient.getPrice() * ingredient.getQuantity();
+
+		// Ingredient expected price
+		Double ingredientExpectedPrice = ingredient.getPrice() * (ingredient.getQuantity() - 1);
+
+		// Ingredient discount
+		Double discount = ingredientOriginalPrice - ingredientExpectedPrice;
+
+		assertEquals(ingredientExpectedPrice, order.getTotalPrice());
+		assertEquals(discount, order.getDiscount());
+		assertTrue(order.getSaleName().contains(proportionalSale.getName()));
 	}
 }
