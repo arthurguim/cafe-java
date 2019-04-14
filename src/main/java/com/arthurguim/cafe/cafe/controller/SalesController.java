@@ -9,6 +9,7 @@ import com.arthurguim.cafe.cafe.model.sales.QuantitativeSale;
 import com.arthurguim.cafe.cafe.repository.ProportionalSaleRepository;
 import com.arthurguim.cafe.cafe.repository.QuantitativeSaleRepository;
 
+import org.apache.commons.math3.util.Precision;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -65,10 +66,11 @@ public class SalesController {
 
                         // Get discount
                         Double discount = (ingredientPrice * ingredientQuantity) - salePrice;
+                        discount = Precision.round(discount, 2);
 
                         // Set order new price
                         Double orderNewPrice = orderTotalPrice - discount;
-
+                        orderNewPrice = Precision.round(orderNewPrice, 2);
                         // Update order
                         order.setTotalPrice(orderNewPrice);
                         order.includeSaleName(proportionalSale.getName());
@@ -84,6 +86,7 @@ public class SalesController {
     private Order applyQuantitativeSale(Order order) {
         boolean hasIncludantIngredient = false;
         boolean hasExcludantIngredient = false;
+        Double salePorcentage = .0;
 
         // Interate through all quantity sales
         for (QuantitativeSale quantitativeSale : quantitativeSales) {
@@ -94,7 +97,7 @@ public class SalesController {
                 // Check if the ingredient is an includant ingredient
                 if(ingredient.getId() == quantitativeSale.getIncludantIngredientId()) {
                     hasIncludantIngredient = true;
-                    break;
+                    continue;
                 }
 
                 // Check if the ingredient is an excludant ingredient
@@ -105,19 +108,26 @@ public class SalesController {
 
             // Check if the sale is applicable
             if(hasIncludantIngredient && !hasExcludantIngredient) {
-                // Apply discount
-                Double orderOriginalPrice = order.getTotalPrice();
-                Double orderDiscount = order.getDiscount();
-
-                // Set price with discount
-                Double orderNewPrice = orderOriginalPrice * (1 - quantitativeSale.getSalePercentage() / 100);
-                Double discount = orderOriginalPrice - orderNewPrice;
-
-                // Update order
-                order.setTotalPrice(orderNewPrice);
-                order.setDiscount(orderDiscount + discount);
+                salePorcentage += quantitativeSale.getSalePercentage();
                 order.includeSaleName(quantitativeSale.getName());
             }
+        }
+
+        // If there's discount to apply
+        if(salePorcentage != 0) {
+            // Apply discount
+            Double orderOriginalPrice = order.getTotalPrice();
+            Double orderDiscount = order.getDiscount();
+
+            // Set price with discount
+            Double orderNewPrice = orderOriginalPrice * (1 - salePorcentage / 100);
+            Double discount = orderOriginalPrice - orderNewPrice;
+            orderNewPrice = Precision.round(orderNewPrice, 2);
+            discount = Precision.round(discount, 2);
+
+            // Update order
+            order.setTotalPrice(orderNewPrice);
+            order.setDiscount(orderDiscount + discount);
         }
 
         return order;

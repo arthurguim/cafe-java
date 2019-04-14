@@ -34,14 +34,14 @@ public class Order {
     public Order(List<Ingredient> ingredients) {
 
         addIngredients(ingredients);
-        this.isCustomHamburguer = false;
+        this.isCustomHamburguer = true;
         this.hamburguerName = StringUtils.EMPTY;
     }
 
     // Constructor for hamburguer
     public Order(List<Ingredient> ingredients, String hamburguerName) {
         addIngredients(ingredients);
-        this.isCustomHamburguer = true;
+        this.isCustomHamburguer = false;
         this.hamburguerName = hamburguerName;
     }
 
