@@ -9,11 +9,11 @@ import lombok.Getter;
 @Getter
 public class ErrorResponse {
     private LocalDateTime timestamp = LocalDateTime.now();
-    private HttpStatus status;
+    private int status;
     private String message;
 
     public ErrorResponse(HttpStatus status, String message) {
-        this.status = status;
+        this.status = status.value();
         this.message = message;
     }
 }

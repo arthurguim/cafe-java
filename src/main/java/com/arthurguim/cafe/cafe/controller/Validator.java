@@ -2,6 +2,7 @@ package com.arthurguim.cafe.cafe.controller;
 
 import java.util.Optional;
 
+import com.arthurguim.cafe.cafe.exception.HamburguerNotFoundException;
 import com.arthurguim.cafe.cafe.exception.IngredientNotFoundException;
 import com.arthurguim.cafe.cafe.model.Hamburguer;
 import com.arthurguim.cafe.cafe.model.Ingredient;
@@ -12,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
-public class IngredientValidator {
+public class Validator {
 
     @Autowired
     private IngredientRepository ingredientRepository;
@@ -32,7 +33,15 @@ public class IngredientValidator {
         return ingredientOpt.get();
     }
 
-    public Hamburguer validateHamburguer(String name) {
-        return hamburguerRepository.findByName(name);
+    public Hamburguer validateHamburguer(String name) throws HamburguerNotFoundException {
+        // Get hamburguer from repository given its name
+        Optional<Hamburguer> hamburguerOpt = hamburguerRepository.findByName(name);
+
+        // Check if the ingredient exists
+        if(!hamburguerOpt.isPresent()) {
+            throw new HamburguerNotFoundException("Hamburguer '" + name + "' was not found.");
+        }
+
+        return hamburguerOpt.get();
     }
 }

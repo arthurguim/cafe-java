@@ -28,8 +28,8 @@ public class SalesController {
         this.proportionalSales = proportionalSaleRepository.findAll();
         this.quantitativeSales = quantitativeSaleRepository.findAll();
 
-        order = applyProportionalSale(order);
-        return applyQuantitativeSale(order);
+        order = applyQuantitativeSale(order);
+        return applyProportionalSale(order);
     }
 
     private Order applyProportionalSale(Order order) {
