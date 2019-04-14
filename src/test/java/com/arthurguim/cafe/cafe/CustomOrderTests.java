@@ -5,11 +5,10 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import com.arthurguim.cafe.cafe.controller.IngredientValidator;
+import com.arthurguim.cafe.cafe.exception.IngredientNotFoundException;
 import com.arthurguim.cafe.cafe.controller.SalesController;
 import com.arthurguim.cafe.cafe.model.Ingredient;
 import com.arthurguim.cafe.cafe.model.Order;
@@ -19,6 +18,8 @@ import com.arthurguim.cafe.cafe.repository.IngredientRepository;
 import com.arthurguim.cafe.cafe.repository.ProportionalSaleRepository;
 import com.arthurguim.cafe.cafe.repository.QuantitativeSaleRepository;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.math3.util.Precision;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +27,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.junit4.SpringRunner;
 
-// TODO: do right exception
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes = CafeApplication.class)
 public class CustomOrderTests {
-
-	@Autowired
-	private IngredientValidator ingredientValidator;
 
 	@Autowired
 	private QuantitativeSaleRepository quantitativeSaleRepository;
@@ -46,45 +43,42 @@ public class CustomOrderTests {
 	@Autowired
 	private SalesController salesController;
 
-	private final List<String> VALID_INGREDIENTS = Arrays.asList("queijo", "hamburguer de carne", "bacon");
-	private final List<String> INVALID_INGREDIENTS = Arrays.asList("picles", "hamburguer", "bacon");
-
 	// Custom order with valid ingredients
 	@Test
-	public void creatingCustomOrderValidIngredients() throws Exception {
-		List<Ingredient> ingredients = new ArrayList<>();
-		for (String ingredientName : VALID_INGREDIENTS) {
-			Ingredient ingredient = ingredientValidator.validateIngredient(ingredientName);
-			ingredient.setQuantity(1);
-			ingredients.add(ingredient);
+	public void creatingCustomOrderIngredients() throws IngredientNotFoundException {
+
+		// Get all ingredients in the database
+		List<Ingredient> ingredients = ingredientRepository.findAll();
+
+		// If there's no ingredients in the database, fail
+		if(ingredients.size() == 0) {
+			fail("There's no ingredients in the test database");
 		}
 
-		Order order = new Order(ingredients);
+		// Set quantity to 1 for every ingredient
+		ingredients.stream().forEach(ingredient -> ingredient.setQuantity(1));
 
+		// Create order
+		Order order = new Order(ingredients);
+		order = salesController.applySaleIfValid(order);
+
+		// Calculate expected values
 		Double totalExpected = .0;
 		for (Ingredient ingredient : ingredients) {
 			totalExpected += ingredient.getPrice() * ingredient.getQuantity();
 		}
+		totalExpected = Precision.round(totalExpected, 2);
 
+		assertEquals((Double) .0, order.getDiscount());
+		assertEquals(0, order.getSaleName().size());
+		assertEquals(StringUtils.EMPTY, order.getHamburguerName());
+		assertEquals(true, order.isCustomHamburguer());
 		assertEquals(totalExpected, order.getTotalPrice());
 	}
 
-	// Custom order with invalid ingredients
-	@Test(expected = Exception.class)
-	public void creatingCustomOrderInvalidIngredients() throws Exception {
-		List<Ingredient> ingredients = new ArrayList<>();
-		for (String ingredientName : INVALID_INGREDIENTS) {
-			Ingredient ingredient = ingredientValidator.validateIngredient(ingredientName);
-			ingredient.setQuantity(1);
-			ingredients.add(ingredient);
-		}
-
-		new Order(ingredients);
-	}
-
-	// Custom with one quantitativeDiscount
+	// Custom with one quantitative discount
 	@Test
-	public void creatingCustomOrderWithOneQuantitativeDiscount() throws Exception {
+	public void creatingCustomOrderWithOneQuantitativeDiscount() {
 		List<Ingredient> ingredients = new ArrayList<>();
 
 		// Get one quantitative sale
@@ -116,17 +110,22 @@ public class CustomOrderTests {
 
 		// Order expectedPrice
 		Double expectedPrice = originalPrice * (1 - quantitativeSale.getSalePercentage() / 100);
+		expectedPrice = Precision.round(expectedPrice, 2);
 
 		// Order discount
 		Double discount = originalPrice - expectedPrice;
+		discount = Precision.round(discount, 2);
 
 		assertEquals(expectedPrice, order.getTotalPrice());
 		assertEquals(discount, order.getDiscount());
 		assertTrue(order.getSaleName().contains(quantitativeSale.getName()));
+		assertEquals(StringUtils.EMPTY, order.getHamburguerName());
+		assertEquals(true, order.isCustomHamburguer());
 	}
 
+	// Custom with one proportional discount
 	@Test
-	public void creatingCustomOrderWithOneProportionalDiscount() throws Exception {
+	public void creatingCustomOrderWithOneProportionalDiscount() {
 		List<Ingredient> ingredients = new ArrayList<>();
 
 		// Get one proportional sale
@@ -165,5 +164,7 @@ public class CustomOrderTests {
 		assertEquals(ingredientExpectedPrice, order.getTotalPrice());
 		assertEquals(discount, order.getDiscount());
 		assertTrue(order.getSaleName().contains(proportionalSale.getName()));
+		assertEquals(StringUtils.EMPTY, order.getHamburguerName());
+		assertEquals(true, order.isCustomHamburguer());
 	}
 }
