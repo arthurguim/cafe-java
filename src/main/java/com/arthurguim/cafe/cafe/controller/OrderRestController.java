@@ -58,6 +58,10 @@ public class OrderRestController {
     @RequestMapping(value = "/hamburguer", method = RequestMethod.POST)
     public ResponseEntity<Order> hamburguerOrder(@RequestBody HamburguerRequest request) throws HamburguerNotFoundException {
 
+        if(request.getHamburguer() == null) {
+            throw new HamburguerNotFoundException("'hamburguer' is mandatory");
+        }
+
         // Validate hamburguer
         Hamburguer hamburguer = validator.validateHamburguer(request.getHamburguer().getName());
 

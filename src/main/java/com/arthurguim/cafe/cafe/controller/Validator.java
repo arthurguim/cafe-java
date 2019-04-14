@@ -9,6 +9,7 @@ import com.arthurguim.cafe.cafe.model.Ingredient;
 import com.arthurguim.cafe.cafe.repository.HamburguerRepository;
 import com.arthurguim.cafe.cafe.repository.IngredientRepository;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +23,12 @@ public class Validator {
     private HamburguerRepository hamburguerRepository;
 
     public Ingredient validateIngredient(String name) throws IngredientNotFoundException {
+
+        // Validate if the ingredient has a name
+        if(name == null || name == StringUtils.EMPTY) {
+            throw new IngredientNotFoundException("'name' is a mandatory");
+        }
+
         // Get ingredient from repository given its name
         Optional<Ingredient> ingredientOpt = ingredientRepository.findByName(name);
 
@@ -34,6 +41,12 @@ public class Validator {
     }
 
     public Hamburguer validateHamburguer(String name) throws HamburguerNotFoundException {
+
+        // Validate if the hamburguer has a name
+        if(name == null || name == StringUtils.EMPTY) {
+            throw new HamburguerNotFoundException("'name' is a mandatory");
+        }
+
         // Get hamburguer from repository given its name
         Optional<Hamburguer> hamburguerOpt = hamburguerRepository.findByName(name);
 
