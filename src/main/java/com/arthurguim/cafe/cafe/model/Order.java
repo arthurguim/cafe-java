@@ -21,7 +21,7 @@ public class Order {
 
     private Double discount = .0;
 
-    public Order(List<Ingredient> ingredients) throws Exception {
+    public Order(List<Ingredient> ingredients) {
 
         for (Ingredient ingredient : ingredients) {
             Double ingredientPrice = ingredient.getPrice() * ingredient.getQuantity();

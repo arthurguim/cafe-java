@@ -3,6 +3,7 @@ package com.arthurguim.cafe.cafe.controller;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.arthurguim.cafe.cafe.exception.IngredientNotFoundException;
 import com.arthurguim.cafe.cafe.model.Ingredient;
 import com.arthurguim.cafe.cafe.model.Order;
 import com.arthurguim.cafe.cafe.model.rest.Request;
@@ -24,18 +25,27 @@ public class OrderRestController {
     @Autowired
     private SalesController salesController;
 
-    // TODO: fix exception
     @RequestMapping(value = "/custom", method = RequestMethod.POST)
-    public ResponseEntity<Order> customOrder(@RequestBody Request request) throws Exception {
+    public ResponseEntity<Order> customOrder(@RequestBody Request request) throws IngredientNotFoundException {
 
         List<Ingredient> ingredients = new ArrayList<>();
+
+        // Interate through all ingredients in the request
         for (Ingredient ingredient : request.getIngredients()) {
+
+            // Validate it and get the database ingredient
             Ingredient i = ingredientValidator.validateIngredient(ingredient.getName());
+
+            // Set the quantity expliced in the request
             i.setQuantity(ingredient.getQuantity());
+
             ingredients.add(i);
         }
 
+        // Create an order with the requests validated
         Order order = new Order(ingredients);
+
+        // Set sales if the order is applicable
         order = salesController.applySaleIfValid(order);
 
         return new ResponseEntity<Order>(order, HttpStatus.CREATED);
